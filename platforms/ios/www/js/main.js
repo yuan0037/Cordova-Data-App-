@@ -475,7 +475,10 @@ function updateGiftListForSelectedPeople(personID, personName){
                                         li.setAttribute("id", rs.rows.item(i).gift_id);
                                         if (rs.rows.item(i).purchased == 1)
                                         {
-                                        li.setAttribute("purchased", "yes");
+                                        li.setAttribute("class", "selected");
+                                        }
+                                        else{
+                                        li.setAttribute("class", "");
                                         }
                                         
                                         var mcForGiftOfSelectedPeople = new Hammer.Manager(li);
@@ -490,6 +493,21 @@ function updateGiftListForSelectedPeople(personID, personName){
                                                                      console.log("giftid = "+curSelectedGiftIndex);
                                                                      if (ev.type == "singletap")
                                                                      {
+                                                                     app.db.transaction(function(trans){
+                                                                                        //console.log("UPDATE gifts SET purchased = 1 where gift_id = ?");
+                                                                                        trans.executeSql("UPDATE gifts SET purchased = CASE WHEN(purchased <> 1) THEN (1) ELSE (0)  END WHERE gift_id = ?", [curSelectedGiftIndex],
+                                                                                                         function(tx, rs){
+                                                                                                         //success
+                                                                                                         console.log("updated one gift");
+                                                                                                         //update the current list;
+                                                                                                         updateGiftListForSelectedPeople(personID, personName);
+                                                                                                         },
+                                                                                                         function(tx, err){
+                                                                                                         //error
+                                                                                                         output("transaction to update a gift failed")
+                                                                                                         });
+                                                                                        });
+
                                                                      }
                                                                      else if (ev.type=="doubletap")
                                                                      {
