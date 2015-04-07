@@ -91,6 +91,16 @@ function setUpAddSaveCancelButtonListener(){
     document.querySelector("#gifts-for-person h2 button").addEventListener("click", addGiftForPerson);
     document.querySelector("#gifts-for-occasion h2 button").addEventListener("click", addGiftForOccasion);
     
+    document.querySelector("#gifts-for-person input[type=button]").addEventListener("click", function(){
+                                                                                    console.log("back button clicked");
+                                                                                    document.querySelector("#gifts-for-person").style.display = "none";
+                                                                                    document.querySelector("#people-list").style.display = "block";
+                                                                                    });
+    document.querySelector("#gifts-for-occasion input[type=button]").addEventListener("click", function(){
+                                                                            console.log("back button clicked");
+                                                                            document.querySelector("#gifts-for-occasion").style.display = "none";
+                                                                            document.querySelector("#occasion-list").style.display = "block";
+                                                                            });
     
     //--------set up event listener for cancel button on every modal dialog-------------
     document.querySelector("#add-person-occasion .btnCancel").addEventListener("click", function(){
@@ -546,9 +556,13 @@ function updateGiftListForSelectedOccasion(occasionID, occasionName){
                                         var li = document.createElement("li");
                                         li.innerHTML = rs.rows.item(i).gift_idea;
                                         li.setAttribute("id", rs.rows.item(i).gift_id);
+
                                         if (rs.rows.item(i).purchased == 1)
                                         {
-                                        li.setAttribute("purchased", "yes");
+                                        li.setAttribute("class", "selected");
+                                        }
+                                        else{
+                                        li.setAttribute("class", "");
                                         }
                                         
                                         var mcForGiftOfSelectedPeople = new Hammer.Manager(li);
@@ -563,11 +577,25 @@ function updateGiftListForSelectedOccasion(occasionID, occasionName){
                                                                      console.log("giftid = "+curSelectedGiftIndex);
                                                                      if (ev.type == "singletap")
                                                                      {
+                                                                     app.db.transaction(function(trans){
+                                                                                        //console.log("UPDATE gifts SET purchased = 1 where gift_id = ?");
+                                                                                        trans.executeSql("UPDATE gifts SET purchased = CASE WHEN(purchased <> 1) THEN (1) ELSE (0)  END WHERE gift_id = ?", [curSelectedGiftIndex],
+                                                                                                         function(tx, rs){
+                                                                                                         //success
+                                                                                                         console.log("updated one gift");
+                                                                                                         //update the current list;
+                                                                                                         updateGiftListForSelectedOccasion(occasionID, occasionName);
+                                                                                                         },
+                                                                                                         function(tx, err){
+                                                                                                         //error
+                                                                                                         output("transaction to update a gift failed")
+                                                                                                         });
+                                                                                        });
                                                                      }
                                                                      else if (ev.type=="doubletap")
                                                                      {
                                                                      app.db.transaction(function(trans){
-                                                                                        trans.executeSql("DELETE FROM gifts where gift_id = ?", [curSelectedGiftIndex],
+                                                                                        trans.executeSql("DELETE FROM gifts WHERE gift_id = ?", [curSelectedGiftIndex],
                                                                                                          function(tx, rs){
                                                                                                          //success
                                                                                                          console.log("deleted one gift");

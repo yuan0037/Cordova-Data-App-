@@ -104,11 +104,8 @@ input, select{
   cursor:pointer;
 }
 
-ul li[purchased="yes"]{
-    background-image: url(../img/accept.png);
-    background-repeat: no-repeat;
-    background-position: 0px center;
-    padding-left: 15px;
+.selected{
+    text-decoration: line-through;
 }
 
 /*************************************
