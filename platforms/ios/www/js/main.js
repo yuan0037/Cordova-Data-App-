@@ -314,6 +314,8 @@ function addPeople(){
     
     document.querySelector("#add-person-occasion").style.display="block";
     document.querySelector("[data-role=overlay]").style.display="block";
+    
+
 }
 
 //------------the following function will be invoked when the "+" button
@@ -325,6 +327,8 @@ function addOccasion(){
     
     document.querySelector("#add-person-occasion").style.display="block";
     document.querySelector("[data-role=overlay]").style.display="block";
+    
+
 }
 
 //----------The following function is invoked when the user taps on the "+" button
@@ -377,7 +381,7 @@ function addGiftForPerson(){
                                         });
                        });
     
-    
+    document.querySelector("#new-idea").value = "";
 }
 
 //----------The following function is invoked when the user taps on the "+" button
@@ -431,6 +435,7 @@ function addGiftForOccasion(){
                                         output("transaction to get drop down contents of person failed")
                                         });
                        });
+    document.querySelector("#new-idea").value="";
 }
 
 function output(msg){
@@ -464,14 +469,14 @@ function updateGiftListForSelectedPeople(personID, personName){
     }
     
     app.db.transaction(function(trans){
-                       trans.executeSql("SELECT gift_id, person_id, occ_id, gift_idea, purchased FROM gifts WHERE person_id=?", [personID],
+                       trans.executeSql("SELECT gifts.*, occasions.occ_name FROM gifts left join occasions on gifts.occ_id = occasions.occ_id where person_id=?", [personID],
                                         function(tx, rs){
                                         //success
                                         var numStuff = rs.rows.length;
                                         console.log("found "+numStuff+" gifts");
                                         for(var i=0; i<numStuff; i++){
                                         var li = document.createElement("li");
-                                        li.innerHTML = rs.rows.item(i).gift_idea;
+                                        li.innerHTML = rs.rows.item(i).gift_idea + " -- " + rs.rows.item(i).occ_name;
                                         li.setAttribute("id", rs.rows.item(i).gift_id);
                                         if (rs.rows.item(i).purchased == 1)
                                         {
@@ -565,14 +570,14 @@ function updateGiftListForSelectedOccasion(occasionID, occasionName){
     }
     
     app.db.transaction(function(trans){
-                       trans.executeSql("SELECT gift_id, person_id, occ_id, gift_idea, purchased FROM gifts WHERE occ_id=?", [occasionID],
+                       trans.executeSql("SELECT gifts.*, people.person_name FROM gifts  left join people on gifts.person_id = people.person_id where occ_id=?", [occasionID],
                                         function(tx, rs){
                                         //success
                                         var numStuff = rs.rows.length;
                                         console.log("found "+numStuff+" gifts");
                                         for(var i=0; i<numStuff; i++){
                                         var li = document.createElement("li");
-                                        li.innerHTML = rs.rows.item(i).gift_idea;
+                                        li.innerHTML = rs.rows.item(i).gift_idea + " -- " + rs.rows.item(i).person_name;
                                         li.setAttribute("id", rs.rows.item(i).gift_id);
 
                                         if (rs.rows.item(i).purchased == 1)
